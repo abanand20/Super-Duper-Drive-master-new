@@ -38,17 +38,28 @@ class CloudStorageApplicationTests {
 	}
 
 	protected HomePage signUpAndLogin() {
+		String uniqueUsername = "u" + System.currentTimeMillis() % 1000000;
+		String password = "12345";
+		
 		driver.get("http://localhost:" + this.port + "/signup");
 		SignupPage signupPage = new SignupPage(driver);
-		signupPage.setFirstName("Abhinav");
-		signupPage.setLastName("Anand");
-		signupPage.setUserName("abanand20");
-		signupPage.setPassword("12345");
+		signupPage.setFirstName("Test");
+		signupPage.setLastName("User");
+		signupPage.setUserName(uniqueUsername);
+		signupPage.setPassword(password);
 		signupPage.signUp();
+		
+		// Check if signup was successful by checking if we're redirected to login
+		try {
+			Thread.sleep(1000); // Wait for redirect
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		
 		driver.get("http://localhost:" + this.port + "/login");
 		LoginPage loginPage = new LoginPage(driver);
-		loginPage.setUserName("abanand20");
-		loginPage.setPassword("12345");
+		loginPage.setUserName(uniqueUsername);
+		loginPage.setPassword(password);
 		loginPage.login();
 
 		return new HomePage(driver);

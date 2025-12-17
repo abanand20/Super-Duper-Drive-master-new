@@ -11,6 +11,10 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class HomePage {
     @FindBy(id = "btnLogout")
     private WebElement logoutButton;
@@ -29,6 +33,9 @@ public class HomePage {
 
     @FindBy(id = "nav-notes-tab")
     private WebElement navNotesTab;
+
+    @FindBy(id = "nav-files-tab")
+    private WebElement navFilesTab;
 
     @FindBy(id = "nav-credentials-tab")
     private WebElement navCredentialsTab;
@@ -90,14 +97,20 @@ public class HomePage {
     @FindBy(id = "tblCredentialPassword")
     private WebElement tblCredentialPassword;
 
+    private final WebDriver driver;
     private final JavascriptExecutor js;
 
     private final WebDriverWait wait;
 
     public HomePage(WebDriver driver) {
         PageFactory.initElements(driver, this);
+        this.driver = driver;
         js = (JavascriptExecutor) driver;
-        wait = new WebDriverWait(driver, 500);
+        wait = new WebDriverWait(driver, 10);
+    }
+
+    public WebDriver getDriver() {
+        return driver;
     }
 
     public void logout() {
@@ -120,8 +133,26 @@ public class HomePage {
         js.executeScript("arguments[0].click();", aDeleteCredential);
     }
 
-    public void uploadFile() {
-        js.executeScript("arguments[0].click();", fileUpload);
+    public void uploadFile(String filePath) {
+        wait.until(ExpectedConditions.elementToBeClickable(fileUpload)).sendKeys(filePath);
+        // Find and click the upload button
+        WebElement uploadButton = driver.findElement(By.xpath("//button[text()='Upload']"));
+        uploadButton.click();
+
+        // Wait for any result link (success, notSaved, or failure)
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.presenceOfElementLocated(By.id("aResultSuccess")),
+                ExpectedConditions.presenceOfElementLocated(By.id("aResultNotSaved")),
+                ExpectedConditions.presenceOfElementLocated(By.id("aResultFailure"))
+        ));
+
+        // If it's a success or notSaved, click the link to return to home. If it's a failure (duplicate), leave on result page
+        if (!driver.findElements(By.id("aResultSuccess")).isEmpty()) {
+            driver.findElement(By.id("aResultSuccess")).click();
+        } else if (!driver.findElements(By.id("aResultNotSaved")).isEmpty()) {
+            driver.findElement(By.id("aResultNotSaved")).click();
+        } // else: aResultFailure present - don't click so tests can assert error message
+
     }
 
     public void addNewNote() {
@@ -160,6 +191,10 @@ public class HomePage {
 
     public void navToNotesTab() {
         js.executeScript("arguments[0].click();", navNotesTab);
+    }
+
+    public void navToFilesTab() {
+        js.executeScript("arguments[0].click();", navFilesTab);
     }
 
     public void navToCredentialsTab() {
@@ -238,5 +273,61 @@ public class HomePage {
 
     public boolean isSearchButtonDisplayed() {
         return searchButton.isDisplayed();
+    }
+
+    public void uploadFile(String filePath) {
+        // Set the file path in the file input
+        fileUpload.sendKeys(filePath);
+
+        // Find and click the upload button
+        WebElement uploadButton = driver.findElement(By.xpath("//button[text()='Upload']"));
+        uploadButton.click();
+    }
+
+    public boolean isFileDisplayed(String fileName) {
+        try {
+            // Look for the file name in the table (it's in a <th> element)
+            return driver.findElement(By.xpath("//th[text()='" + fileName + "']")).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public List<String> getDisplayedFileNames() {
+        try {
+            List<WebElement> fileNameElements = driver.findElements(By.xpath("//table[@id='fileTable']//th"));
+            return fileNameElements.stream()
+                    .map(WebElement::getText)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public void viewFile(String fileName) {
+        // Find and click the view button for the specific file
+        WebElement viewButton = driver.findElement(By.xpath("//th[text()='" + fileName + "']/preceding-sibling::td/a[contains(@href, 'view-file')]"));
+        viewButton.click();
+    }
+
+    public void downloadFile(String fileName) {
+        // Find and click the download button for the specific file
+        WebElement downloadButton = driver.findElement(By.xpath("//th[text()='" + fileName + "']/preceding-sibling::td/a[contains(@href, 'get-file')]"));
+        downloadButton.click();
+    }
+
+    public void deleteFile(String fileName) {
+        // Find and click the delete button for the specific file
+        WebElement deleteButton = driver.findElement(By.xpath("//th[text()='" + fileName + "']/preceding-sibling::td/a[contains(@href, 'delete-file')]"));
+        deleteButton.click();
+    }
+
+    public boolean isErrorMessageDisplayed() {
+        try {
+            // Look for error messages (this might need to be adjusted based on actual error display)
+            return driver.findElement(By.className("alert-danger")).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

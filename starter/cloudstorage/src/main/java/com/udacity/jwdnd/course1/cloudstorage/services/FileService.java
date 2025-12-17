@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -44,7 +45,7 @@ public class FileService {
         String contentType = multipartFile.getContentType();
         String fileSize = String.valueOf(multipartFile.getSize());
         Integer userId = userMapper.getUser(userName).getUserId();
-        File file = new File(0, fileName, contentType, fileSize, userId, fileData);
+        File file = new File(0, fileName, contentType, fileSize, userId, fileData, LocalDateTime.now());
         if(!fileSize.equals("0"))
         {
             fileMapper.insert(file);
