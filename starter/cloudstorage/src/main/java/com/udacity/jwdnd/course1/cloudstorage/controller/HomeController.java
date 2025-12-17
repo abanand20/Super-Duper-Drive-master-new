@@ -139,6 +139,24 @@ public class HomeController {
                 .body(file.getFileData());
     }
 
+    @GetMapping(
+            value = "/view-file/{fileName}",
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+    )
+    public ResponseEntity<byte[]> viewFile(@PathVariable String fileName, Authentication authentication) {
+        Integer userId = getUserId(authentication);
+        File file = fileService.getFile(fileName, userId);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, file.getContentType());
+        // Note: No Content-Disposition header for viewing - browser will display inline if supported
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(file.getFileData());
+    }
+
     @GetMapping(value = "/delete-file/{fileName}")
     public String deleteFile(
             Authentication authentication, @PathVariable String fileName, @ModelAttribute("newFile") FileForm newFile,

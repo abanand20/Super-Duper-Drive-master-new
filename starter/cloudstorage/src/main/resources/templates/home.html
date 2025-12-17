@@ -61,9 +61,11 @@
                         <tbody>
                         <tr th:each="file : ${files}">
                             <td>
-                                <a target="_blank" class="btn btn-success"
-                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
-                                <a class="btn btn-danger"
+                                <a target="_blank" class="btn btn-info btn-sm"
+                                   th:href="@{/home/view-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
+                                <a class="btn btn-success btn-sm"
+                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">Download</a>
+                                <a class="btn btn-danger btn-sm"
                                    th:href="@{/home/delete-file/{fileName}(fileName = ${file.getFileName()})}">Delete</a>
                             </td>
                             <th scope="row" th:text="${file.getFileName()}">ExampleFile.txt</th>
@@ -253,9 +255,11 @@
                         <tbody>
                         <tr th:each="file : ${searchResults}">
                             <td>
-                                <a target="_blank" class="btn btn-success"
-                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
-                                <a class="btn btn-danger"
+                                <a target="_blank" class="btn btn-info btn-sm"
+                                   th:href="@{/home/view-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
+                                <a class="btn btn-success btn-sm"
+                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">Download</a>
+                                <a class="btn btn-danger btn-sm"
                                    th:href="@{/home/delete-file/{fileName}(fileName = ${file.getFileName()})}">Delete</a>
                             </td>
                             <th scope="row" th:text="${file.getFileName()}">ExampleFile.txt</th>
