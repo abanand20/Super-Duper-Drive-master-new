@@ -12,24 +12,28 @@
 <div class="container">
     <div id="logoutDiv">
         <form action="#" th:action="@{/logout}" method="POST">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button type="submit" class="btn btn-secondary float-right" id="btnLogout">Logout</button>
         </form>
     </div>
     <div id="contentDiv" style="clear: right;">
         <nav style="clear: right;">
             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active" id="nav-files-tab" data-toggle="tab" href="#nav-files" role="tab"
+                <a class="nav-item nav-link" th:classappend="${searchResults == null} ? 'active' : ''" id="nav-files-tab" data-toggle="tab" href="#nav-files" role="tab"
                    aria-controls="nav-files" aria-selected="true">Files</a>
                 <a class="nav-item nav-link" id="nav-notes-tab" data-toggle="tab" href="#nav-notes" role="tab"
                    aria-controls="nav-notes" aria-selected="false">Notes</a>
                 <a class="nav-item nav-link" id="nav-credentials-tab" data-toggle="tab" href="#nav-credentials"
                    role="tab" aria-controls="nav-credentials" aria-selected="false">Credentials</a>
+                <a class="nav-item nav-link" th:classappend="${searchResults != null} ? 'active' : ''" id="nav-search-tab" data-toggle="tab" href="#nav-search" role="tab"
+                   aria-controls="nav-search" aria-selected="false">Search Files</a>
             </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
+            <div class="tab-pane fade" th:classappend="${searchResults == null} ? 'show active' : ''" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
                 <form action="#" th:action="@{'/home'}" th:object="${newFile}" enctype="multipart/form-data"
                       method="POST">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="container">
                         <div class="row" style="margin: 1em;">
                             <div class="col-sm-2">
@@ -50,18 +54,20 @@
                         <thead>
                         <tr>
                             <th style="width: 20%" scope="col"></th>
-                            <th style="width: 80%" scope="col">File Name</th>
+                            <th style="width: 50%" scope="col">File Name</th>
+                            <th style="width: 30%" scope="col">File Size</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="file : ${files}">
                             <td>
                                 <a target="_blank" class="btn btn-success"
-                                   th:href="@{/home/get-file/{file}(file = ${file})}">View</a>
+                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
                                 <a class="btn btn-danger"
-                                   th:href="@{/home/delete-file/{file}(file = ${file})}">Delete</a>
+                                   th:href="@{/home/delete-file/{fileName}(fileName = ${file.getFileName()})}">Delete</a>
                             </td>
-                            <th scope="row" th:text="${file}">ExampleFile.txt</th>
+                            <th scope="row" th:text="${file.getFileName()}">ExampleFile.txt</th>
+                            <td th:text="${file.getFileSize()}">1024 bytes</td>
                         </tr>
                         </tbody>
                     </table>
@@ -114,6 +120,7 @@
                             </div>
                             <div class="modal-body">
                                 <form action="#" method="POST" th:action="@{/note/add-note}" th:object="${newNote}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <input type="hidden" name="noteId" th:field="*{noteId}" id="note-id">
                                     <div class="form-group">
                                         <label for="note-title" class="col-form-label">Title</label>
@@ -187,6 +194,7 @@
                             </div>
                             <div class="modal-body">
                                 <form action="#" method="POST" th:action="@{/credential/add-credential}" th:object="${newCredential}">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <input type="hidden" name="credentialId" th:field="*{credentialId}" id="credential-id">
                                     <div class="form-group">
                                         <label for="note-title" class="col-form-label">URL</label>
@@ -214,6 +222,47 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" th:classappend="${searchResults != null} ? 'show active' : ''" id="nav-search" role="tabpanel" aria-labelledby="nav-search-tab">
+                <form th:action="@{/home/search-files}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="container">
+                        <div class="row" style="margin: 1em;">
+                            <div class="col-sm-3">
+                                <label for="searchQuery">Search Files by Name:</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" name="query" class="form-control" id="searchQuery" placeholder="Enter file name">
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div th:if="${searchResults != null}" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th style="width: 20%" scope="col"></th>
+                            <th style="width: 50%" scope="col">File Name</th>
+                            <th style="width: 30%" scope="col">File Size</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="file : ${searchResults}">
+                            <td>
+                                <a target="_blank" class="btn btn-success"
+                                   th:href="@{/home/get-file/{fileName}(fileName = ${file.getFileName()})}">View</a>
+                                <a class="btn btn-danger"
+                                   th:href="@{/home/delete-file/{fileName}(fileName = ${file.getFileName()})}">Delete</a>
+                            </td>
+                            <th scope="row" th:text="${file.getFileName()}">ExampleFile.txt</th>
+                            <td th:text="${file.getFileSize()}">1024 bytes</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -33,6 +33,15 @@ public class HomePage {
     @FindBy(id = "nav-credentials-tab")
     private WebElement navCredentialsTab;
 
+    @FindBy(id = "nav-search-tab")
+    private WebElement navSearchTab;
+
+    @FindBy(id = "searchQuery")
+    private WebElement searchQueryInput;
+
+    @FindBy(css = "button[type='submit']")
+    private WebElement searchButton;
+
     @FindBy(id = "note-description")
     private WebElement txtNoteDescription;
 
@@ -157,6 +166,18 @@ public class HomePage {
         js.executeScript("arguments[0].click();", navCredentialsTab);
     }
 
+    public void navToSearchTab() {
+        js.executeScript("arguments[0].click();", navSearchTab);
+    }
+
+    public void setSearchQuery(String query) {
+        js.executeScript("arguments[0].value='" + query + "';", searchQueryInput);
+    }
+
+    public void performSearch() {
+        js.executeScript("arguments[0].click();", searchButton);
+    }
+
     public void setNoteDescription(String noteDescription) {
         js.executeScript("arguments[0].value='"+ noteDescription +"';", txtNoteDescription);
     }
@@ -182,11 +203,14 @@ public class HomePage {
     public boolean isElementPresent(By locatorKey, WebDriver driver) {
         try {
             driver.findElement(locatorKey);
-
             return true;
         } catch (org.openqa.selenium.NoSuchElementException e) {
             return false;
         }
+    }
+
+    public boolean hasSearchResults(WebDriver driver) {
+        return isElementPresent(By.cssSelector("table tbody tr"), driver);
     }
 
     public Note getFirstNote() {
@@ -202,5 +226,17 @@ public class HomePage {
         String password = tblCredentialPassword.getText();
 
         return new Credential(url, username, password);
+    }
+
+    public boolean isSearchTabDisplayed() {
+        return navSearchTab.isDisplayed();
+    }
+
+    public boolean isSearchInputDisplayed() {
+        return searchQueryInput.isDisplayed();
+    }
+
+    public boolean isSearchButtonDisplayed() {
+        return searchButton.isDisplayed();
     }
 }

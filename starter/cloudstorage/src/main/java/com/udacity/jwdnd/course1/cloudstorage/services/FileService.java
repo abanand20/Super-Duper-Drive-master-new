@@ -6,9 +6,10 @@ import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -22,6 +23,10 @@ public class FileService {
 
     public String[] getFileListings(Integer userId) {
         return fileMapper.getFileListings(userId);
+    }
+
+    public List<File> getFiles(Integer userId) {
+        return fileMapper.getFiles(userId);
     }
 
     public void addFile(MultipartFile multipartFile, String userName) throws IOException {
@@ -49,11 +54,11 @@ public class FileService {
 
 
 
-    public File getFile(String fileName) {
-        return fileMapper.getFile(fileName);
+    public File getFile(String fileName, Integer userId) {
+        return fileMapper.getFile(fileName, userId);
     }
 
-    public void deleteFile(String fileName) {
-        fileMapper.deleteFile(fileName);
+    public void deleteFile(String fileName, Integer userId) {
+        fileMapper.deleteFile(fileName, userId);
     }
 }
