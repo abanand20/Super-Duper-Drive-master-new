@@ -275,15 +275,6 @@ public class HomePage {
         return searchButton.isDisplayed();
     }
 
-    public void uploadFile(String filePath) {
-        // Set the file path in the file input
-        fileUpload.sendKeys(filePath);
-
-        // Find and click the upload button
-        WebElement uploadButton = driver.findElement(By.xpath("//button[text()='Upload']"));
-        uploadButton.click();
-    }
-
     public boolean isFileDisplayed(String fileName) {
         try {
             // Look for the file name in the table (it's in a <th> element)
